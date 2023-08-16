@@ -4,10 +4,14 @@ pragma solidity >=0.8.4 <0.9.0;
 import {IXERC20} from 'interfaces/IXERC20.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import {IXERC20Lockbox} from 'interfaces/IXERC20Lockbox.sol';
+import {IAllowanceTransfer} from 'interfaces/IAllowanceTransfer.sol';
+import {ISignatureTransfer} from 'interfaces/ISignatureTransfer.sol';
 
 contract XERC20Lockbox is IXERC20Lockbox {
   using SafeERC20 for IERC20;
+  using SafeCast for uint256;
 
   /**
    * @notice The XERC20 token of this contract
@@ -24,6 +28,12 @@ contract XERC20Lockbox is IXERC20Lockbox {
    */
 
   bool public immutable IS_NATIVE;
+
+  /**
+   * @notice Permit2 address
+   */
+  // IAllowanceTransfer public immutable PERMIT2 = IAllowanceTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
+  ISignatureTransfer public immutable PERMIT2 = ISignatureTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
 
   /**
    * @notice Constructor
@@ -59,6 +69,31 @@ contract XERC20Lockbox is IXERC20Lockbox {
     if (IS_NATIVE) revert IXERC20Lockbox_Native();
 
     ERC20.safeTransferFrom(msg.sender, address(this), _amount);
+    XERC20.mint(msg.sender, _amount);
+
+    emit Deposit(msg.sender, _amount);
+  }
+
+  /**
+   * @notice Deposit ERC20 tokens into the lockbox using Permit2
+   *
+   * @param _amount The amount of tokens to deposit
+   */
+
+  function depositWithPermitTransferFrom(
+    uint256 _amount,
+    address _owner,
+    ISignatureTransfer.PermitTransferFrom calldata _permit,
+    bytes calldata _signature
+  ) external {
+    if (IS_NATIVE) revert IXERC20Lockbox_Native();
+
+    PERMIT2.permitTransferFrom(
+      _permit,
+      ISignatureTransfer.SignatureTransferDetails({to: address(this), requestedAmount: _amount}),
+      _owner,
+      _signature
+    );
     XERC20.mint(msg.sender, _amount);
 
     emit Deposit(msg.sender, _amount);
