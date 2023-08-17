@@ -6,9 +6,8 @@ import {IERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import {IXERC20Lockbox} from 'interfaces/IXERC20Lockbox.sol';
-import {IAllowanceTransfer} from 'interfaces/IAllowanceTransfer.sol';
-import {ISignatureTransfer} from 'interfaces/ISignatureTransfer.sol';
-import {IPermit2} from 'interfaces/IPermit2.sol';
+import {IAllowanceTransfer} from 'permit2/src/interfaces/IAllowanceTransfer.sol';
+import {IPermit2} from 'permit2/src/interfaces/IPermit2.sol';
 
 contract XERC20Lockbox is IXERC20Lockbox {
   using SafeERC20 for IERC20;

@@ -2,10 +2,10 @@
 pragma solidity >=0.8.4 <0.9.0;
 
 import {CommonE2EBase} from './Common.sol';
-import {PermitHash} from 'libraries/PermitHash.sol';
-import {IAllowanceTransfer} from 'interfaces/IAllowanceTransfer.sol';
-import {PermitSignature} from 'libraries/PermitSignature.sol';
-import {IEIP712} from 'interfaces/IEIP712.sol';
+import {PermitHash} from 'permit2/src/libraries/PermitHash.sol';
+import {IAllowanceTransfer} from 'permit2/src/interfaces/IAllowanceTransfer.sol';
+import {PermitSignature} from 'permit2/test/utils/PermitSignature.sol';
+import {IEIP712} from 'permit2/src/interfaces/IEIP712.sol';
 import {XERC20Lockbox} from 'contracts/XERC20Lockbox.sol';
 import {XERC20} from 'contracts/XERC20.sol';
 import {console} from 'forge-std/console.sol';

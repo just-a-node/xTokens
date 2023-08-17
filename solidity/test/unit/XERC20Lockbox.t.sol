@@ -9,8 +9,8 @@ import {XERC20} from 'contracts/XERC20.sol';
 import {XERC20Lockbox} from 'contracts/XERC20Lockbox.sol';
 import {IXERC20Lockbox} from 'interfaces/IXERC20Lockbox.sol';
 import {IXERC20} from 'interfaces/IXERC20.sol';
-import {IAllowanceTransfer} from 'interfaces/IAllowanceTransfer.sol';
-import {IPermit2} from 'interfaces/IPermit2.sol';
+import {IAllowanceTransfer} from 'permit2/src/interfaces/IAllowanceTransfer.sol';
+import {IPermit2} from 'permit2/src/interfaces/IPermit2.sol';
 
 abstract contract Base is Test {
   address internal _owner = vm.addr(1);
@@ -101,7 +101,7 @@ contract UnitDeposit is Base {
       spender: address(_lockbox),
       sigDeadline: expiration
     }); 
-    
+
     _nativeLockbox.depositWithPermitAllowance(_amount, _owner, permit, bytes(""));
   }
 
