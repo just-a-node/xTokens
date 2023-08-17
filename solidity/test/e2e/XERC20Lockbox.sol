@@ -11,11 +11,6 @@ import {XERC20} from 'contracts/XERC20.sol';
 import {console} from 'forge-std/console.sol';
 
 contract E2ELockbox is CommonE2EBase, PermitSignature {
-  // function sign(bytes32 msgHash, uint256 privateKey) public pure returns (bytes memory sig) {
-  //   (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, msgHash);
-  //   return bytes.concat(r, s, bytes1(v));
-  // }
-
   function testLockbox() public {
     assertEq(address(_lockbox.XERC20()), address(_xerc20));
     assertEq(address(_lockbox.ERC20()), address(_dai));
