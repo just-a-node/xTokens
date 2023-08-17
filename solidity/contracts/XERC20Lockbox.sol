@@ -8,6 +8,7 @@ import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import {IXERC20Lockbox} from 'interfaces/IXERC20Lockbox.sol';
 import {IAllowanceTransfer} from 'interfaces/IAllowanceTransfer.sol';
 import {ISignatureTransfer} from 'interfaces/ISignatureTransfer.sol';
+import {IPermit2} from 'interfaces/IPermit2.sol';
 
 contract XERC20Lockbox is IXERC20Lockbox {
   using SafeERC20 for IERC20;
@@ -32,8 +33,8 @@ contract XERC20Lockbox is IXERC20Lockbox {
   /**
    * @notice Permit2 address
    */
-  // IAllowanceTransfer public immutable PERMIT2 = IAllowanceTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
-  ISignatureTransfer public immutable PERMIT2 = ISignatureTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
+
+  IPermit2 public immutable PERMIT2 = IPermit2(0x000000000022D473030F116dDEE9F6B43aC78BA3);
 
   /**
    * @notice Constructor
@@ -80,23 +81,24 @@ contract XERC20Lockbox is IXERC20Lockbox {
    * @param _amount The amount of tokens to deposit
    */
 
-  function depositWithPermitTransferFrom(
+  function depositWithPermitAllowance(
     uint256 _amount,
     address _owner,
-    ISignatureTransfer.PermitTransferFrom calldata _permit,
-    bytes calldata _signature
+    IAllowanceTransfer.PermitSingle calldata _permit,
+    bytes calldata signature
   ) external {
     if (IS_NATIVE) revert IXERC20Lockbox_Native();
 
-    PERMIT2.permitTransferFrom(
-      _permit,
-      ISignatureTransfer.SignatureTransferDetails({to: address(this), requestedAmount: _amount}),
+    PERMIT2.permit(
       _owner,
-      _signature
+      _permit,
+      signature
     );
-    XERC20.mint(msg.sender, _amount);
 
-    emit Deposit(msg.sender, _amount);
+    PERMIT2.transferFrom(_owner, address(this), _amount.toUint160(), address(ERC20));
+    XERC20.mint(_owner, _amount);
+
+    emit Deposit(_owner, _amount);
   }
 
   /**

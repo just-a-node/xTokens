@@ -9,6 +9,8 @@ import {XERC20} from 'contracts/XERC20.sol';
 import {XERC20Lockbox} from 'contracts/XERC20Lockbox.sol';
 import {IXERC20Lockbox} from 'interfaces/IXERC20Lockbox.sol';
 import {IXERC20} from 'interfaces/IXERC20.sol';
+import {IAllowanceTransfer} from 'interfaces/IAllowanceTransfer.sol';
+import {IPermit2} from 'interfaces/IPermit2.sol';
 
 abstract contract Base is Test {
   address internal _owner = vm.addr(1);
@@ -17,6 +19,8 @@ abstract contract Base is Test {
 
   XERC20 internal _xerc20 = XERC20(vm.addr(4));
   IERC20 internal _erc20 = IERC20(vm.addr(5));
+
+  IPermit2 internal _permit2 = IPermit2(vm.addr(6));
 
   event Deposit(address _sender, uint256 _amount);
   event Withdraw(address _sender, uint256 _amount);
@@ -72,12 +76,33 @@ contract UnitDeposit is Base {
     _lockbox.deposit{value: _amount}();
   }
 
-  function testNativeRevertsIfDeployIntoNonNative(uint256 _amount) public {
+  function testNativeRevertsIfDepositIntoNonNative(uint256 _amount) public {
     vm.assume(_amount > 0);
     vm.deal(_owner, _amount);
     vm.prank(_owner);
     vm.expectRevert(IXERC20Lockbox.IXERC20Lockbox_Native.selector);
     _nativeLockbox.deposit(_amount);
+  }
+
+  function testNativeRevertsIfDepositWithPermitAllowance(uint256 _amount) public {
+    vm.assume(_amount > 0);
+    vm.deal(_owner, _amount);
+    vm.prank(_owner);
+    vm.expectRevert(IXERC20Lockbox.IXERC20Lockbox_Native.selector);
+    
+    uint48 expiration = uint48(2**48 - 1);
+    IAllowanceTransfer.PermitSingle memory permit = IAllowanceTransfer.PermitSingle({
+      details: IAllowanceTransfer.PermitDetails({
+        token: address(_erc20),
+        amount: uint160(_amount),
+        expiration: expiration,
+        nonce: 0
+      }),
+      spender: address(_lockbox),
+      sigDeadline: expiration
+    }); 
+    
+    _nativeLockbox.depositWithPermitAllowance(_amount, _owner, permit, bytes(""));
   }
 
   function testNativeDeposit(uint256 _amount) public {
