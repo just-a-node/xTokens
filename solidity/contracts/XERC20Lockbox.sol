@@ -78,6 +78,7 @@ contract XERC20Lockbox is IXERC20Lockbox {
    * @notice Deposit ERC20 tokens into the lockbox using Permit2
    *
    * @param _amount The amount of tokens to deposit
+   * @param _owner The owner of the tokens being deposited
    */
 
   function depositWithPermitAllowance(
